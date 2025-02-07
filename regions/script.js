@@ -50,3 +50,75 @@ const setItemStatus = (e) => {
 
   e.target.classList.add(style); //On modifie l'élement sélectionné
 };
+
+const getRegions = async () => {
+  fetch(`https://geo.api.gouv.fr/regions`).then((response) => {
+    return response.json();
+  }).then((data) => {
+    console.log(data);
+    displayRegions(data);
+  });
+};
+
+const displayRegions = (data) => {
+  data.forEach((region) => {
+    const option = document.createElement("option");
+    option.value = region.code;
+    option.text = region.nom;
+    regList.appendChild(option);
+  });
+  setCounter(regList, data.length);
+
+}
+
+getRegions();
+
+const getDepartements = (event) => {
+  setItemStatus(event);
+  fetch(`${path}/regions/${event.target.value}/departements`).then((response) => {
+    return response.json();
+  }).then((data) => {
+    console.log(data);
+    displayDepartements(data);
+  });
+};
+
+const displayDepartements = (data) => {
+  dptList.innerHTML = "";
+  data.forEach((departement) => {
+    const option = document.createElement("option");
+    option.value = departement.code;
+    option.text = departement.nom;
+    dptList.appendChild(option);
+  });
+  setCounter(dptList, data.length);
+}
+
+regList.addEventListener("click", getDepartements);
+
+dptList.addEventListener("click", (event) => {
+  setItemStatus(event);
+  fetch(`${path}/departements/${event.target.value}/communes?fields=code,nom,population,surface`).then((response) => {
+    return response.json();
+  }).then((data) => {
+    console.log(data);
+    displayCities(data);
+  });
+});
+
+const displayCities = (data) => {
+  cityList.innerHTML = "";
+  data.forEach((city) => {
+    const option = document.createElement("option");
+    option.value = city.code;
+    option.text = city.nom;
+    option.setAttribute("elt-population", city.population);
+    option.setAttribute("elt-surface", city.surface);
+    option.addEventListener("mouseover", displayInfo);
+    cityList.appendChild(option);
+  });
+  setCounter(cityList, data.length);
+}
+
+
+
